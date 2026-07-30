@@ -22,10 +22,25 @@ async function loadCategories() {
       return;
     }
 
-    categoryList.innerHTML = categories.map(cat => `
-      <div class="category-card" data-id="${cat.id}" data-name="${cat.name}">
-        <span class="section-tag">${cat.section}</span>
-        <h3>${cat.name}</h3>
+    const sections = {};
+    categories.forEach(cat => {
+      const key = cat.section || 'other';
+      if (!sections[key]) sections[key] = [];
+      sections[key].push(cat);
+    });
+
+    const sectionLabel = key => key.charAt(0).toUpperCase() + key.slice(1);
+
+    categoryList.innerHTML = Object.entries(sections).map(([section, cats]) => `
+      <div class="section-group">
+        <h3 class="section-heading">${sectionLabel(section)}</h3>
+        <div class="category-grid">
+          ${cats.map(cat => `
+            <div class="category-card" data-id="${cat.id}" data-name="${cat.name}">
+              <h3>${cat.name}</h3>
+            </div>
+          `).join('')}
+        </div>
       </div>
     `).join('');
 

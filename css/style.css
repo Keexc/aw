@@ -139,6 +139,16 @@ a { color: inherit; }
 .muted { color: rgba(18,16,13,0.6); font-size: 0.92rem; }
 .hidden { display: none !important; }
 
+.section-group { margin-bottom: 36px; }
+.section-heading {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--green);
+  margin: 0 0 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
 /* Category grid */
 .category-grid {
   display: grid;

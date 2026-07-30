@@ -114,8 +114,13 @@ window.deleteCategory = async (id) => {
 
 document.getElementById('newCategoryBtn').addEventListener('click', () => {
   openFormModal('New category', `
-    <label class="field"><span>Name</span><input id="f_name" /></label>
-    <label class="field"><span>Section</span><input id="f_section" placeholder="entertainment / politics / literature" /></label>
+    <label class="field"><span>Section</span>
+      <select id="f_section">
+        <option value="entertainment">Entertainment</option>
+        <option value="politics">Politics</option>
+      </select>
+    </label>
+    <label class="field"><span>Category name</span><input id="f_name" placeholder="e.g. Best Radio Presenter" /></label>
     <label class="field"><span>Display order</span><input id="f_order" type="number" value="0" /></label>
   `, async () => {
     await api('/admin/categories', {
@@ -160,7 +165,12 @@ window.deleteNominee = async (id) => {
 };
 
 document.getElementById('newNomineeBtn').addEventListener('click', () => {
-  const options = categoriesCache.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+  const sections = [...new Set(categoriesCache.map(c => c.section))];
+  const options = sections.map(section => `
+    <optgroup label="${section.charAt(0).toUpperCase() + section.slice(1)}">
+      ${categoriesCache.filter(c => c.section === section).map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+    </optgroup>
+  `).join('');
   openFormModal('New nominee', `
     <label class="field"><span>Category</span><select id="f_cat">${options}</select></label>
     <label class="field"><span>Full name</span><input id="f_fullname" /></label>
