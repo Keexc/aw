@@ -1,0 +1,92 @@
+.admin-login {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--black);
+}
+.admin-login-card {
+  background: white;
+  padding: 36px;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 340px;
+}
+.admin-login-card h1 {
+  font-family: var(--font-display);
+  margin: 0 0 20px;
+  font-size: 1.4rem;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--line);
+  background: var(--black);
+  color: white;
+}
+.admin-header .brand-mark { color: var(--gold-bright); }
+.admin-header .btn-link { color: var(--gold-bright); }
+
+.admin-main { padding: 36px 24px; }
+
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-bottom: 40px;
+}
+.stat-card {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 18px;
+}
+.stat-card .stat-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(18,16,13,0.55);
+}
+.stat-card .stat-value {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  margin-top: 6px;
+}
+
+.admin-section { margin-bottom: 48px; }
+.admin-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.admin-section-head h2 { margin: 0; font-family: var(--font-display); font-size: 1.3rem; }
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+.admin-table th, .admin-table td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.admin-table th {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(18,16,13,0.55);
+}
+.admin-table .row-actions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--green);
+  margin-right: 10px;
+}
+.admin-table .row-actions button.danger { color: #B3261E; }

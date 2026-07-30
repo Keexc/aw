@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KEA Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/admin.css" />
+</head>
+<body>
+
+<div id="loginScreen" class="admin-login">
+  <div class="admin-login-card">
+    <h1>KEA Admin</h1>
+    <label class="field"><span>Email</span><input id="loginEmail" type="email" /></label>
+    <label class="field"><span>Password</span><input id="loginPassword" type="password" /></label>
+    <button id="loginBtn" class="btn btn-primary btn-block">Log in</button>
+    <p id="loginError" class="vote-status error"></p>
+  </div>
+</div>
+
+<div id="dashboard" class="admin-dashboard hidden">
+  <header class="admin-header">
+    <span class="brand-mark">KEA Admin</span>
+    <button id="logoutBtn" class="btn-link">Log out</button>
+  </header>
+
+  <main class="wrap admin-main">
+
+    <section class="admin-stats" id="statsRow"></section>
+
+    <section class="admin-section">
+      <div class="admin-section-head">
+        <h2>Categories</h2>
+        <button id="newCategoryBtn" class="btn btn-primary">New category</button>
+      </div>
+      <table class="admin-table" id="categoryTable"></table>
+    </section>
+
+    <section class="admin-section">
+      <div class="admin-section-head">
+        <h2>Nominees</h2>
+        <button id="newNomineeBtn" class="btn btn-primary">New nominee</button>
+      </div>
+      <table class="admin-table" id="nomineeTable"></table>
+    </section>
+
+    <section class="admin-section">
+      <div class="admin-section-head">
+        <h2>Transactions</h2>
+        <a id="exportCsv" class="btn-link" href="#">Export CSV</a>
+      </div>
+      <table class="admin-table" id="transactionTable"></table>
+    </section>
+
+  </main>
+</div>
+
+<!-- Simple modal reused for category/nominee forms -->
+<div id="formModal" class="modal hidden">
+  <div class="modal-card">
+    <button id="closeFormModal" class="modal-close">&times;</button>
+    <h3 id="formModalTitle"></h3>
+    <div id="formModalBody"></div>
+    <button id="formModalSubmit" class="btn btn-primary btn-block">Save</button>
+    <p id="formModalStatus" class="vote-status"></p>
+  </div>
+</div>
+
+<script src="js/admin.js"></script>
+</body>
+</html>

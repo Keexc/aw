@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kenyan Excellence Awards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <div class="brand">
+      <span class="brand-mark">KEA</span>
+      <span class="brand-name">Kenyan Excellence Awards</span>
+    </div>
+    <nav class="header-nav">
+      <a href="#categories">Categories</a>
+      <a href="#results">Results</a>
+      <a href="admin.html">Admin</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-inner">
+    <p class="eyebrow">2026 Public Vote</p>
+    <h1>Celebrating Kenya's<br />Finest &amp; Their Fans</h1>
+    <p class="hero-sub">Cast your vote by M-Pesa. KSh 20 per vote, no limit — results update live for everyone to see.</p>
+    <a class="btn btn-primary" href="#categories">Vote now</a>
+  </div>
+</section>
+
+<main class="wrap">
+
+  <section id="categories" class="section">
+    <h2>Award categories</h2>
+    <div id="categoryList" class="category-grid">
+      <p class="muted">Loading categories…</p>
+    </div>
+  </section>
+
+  <section id="nominees" class="section hidden">
+    <button id="backToCategories" class="btn-link">&larr; All categories</button>
+    <h2 id="nomineeCategoryTitle"></h2>
+    <div id="nomineeList" class="nominee-grid"></div>
+  </section>
+
+  <section id="results" class="section">
+    <h2>Live results</h2>
+    <p class="muted">Every vote is counted publicly and updates in real time.</p>
+    <div id="resultsList"></div>
+  </section>
+
+</main>
+
+<!-- Vote modal -->
+<div id="voteModal" class="modal hidden">
+  <div class="modal-card">
+    <button id="closeModal" class="modal-close">&times;</button>
+    <h3 id="voteModalName"></h3>
+    <p class="muted">KSh 20 per vote</p>
+
+    <label class="field">
+      <span>Number of votes</span>
+      <input id="voteCount" type="number" min="1" value="1" />
+    </label>
+
+    <p class="total-line">Total: <strong id="voteTotal">KSh 20</strong></p>
+
+    <label class="field">
+      <span>M-Pesa phone number</span>
+      <input id="votePhone" type="tel" placeholder="07XXXXXXXX" />
+    </label>
+
+    <button id="submitVote" class="btn btn-primary btn-block">Pay with M-Pesa</button>
+    <p id="voteStatus" class="vote-status"></p>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p>&copy; 2026 Kenyan Excellence Awards. Payments processed via FXS Pay.</p>
+  </div>
+</footer>
+
+<script src="js/app.js"></script>
+</body>
+</html>
