@@ -49,6 +49,7 @@ a { color: inherit; }
   color: var(--green);
   letter-spacing: 0.02em;
 }
+.admin-brand { display: flex; align-items: center; gap: 8px; }
 .brand-name { font-weight: 600; font-size: 0.95rem; letter-spacing: 0.01em; }
 .header-nav a {
   text-decoration: none;
@@ -173,6 +174,17 @@ a { color: inherit; }
   font-weight: 600;
 }
 .category-card h3 { margin: 8px 0 0; font-size: 1.05rem; }
+
+.prize-info {
+  background: linear-gradient(90deg, rgba(20,107,58,0.08), rgba(201,162,39,0.12));
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  padding: 14px 18px;
+  margin: 0 0 24px;
+  font-size: 0.88rem;
+}
+.prize-info p { margin: 4px 0; }
+.prize-info strong { color: var(--green); }
 
 /* Nominee grid */
 .nominee-grid {
