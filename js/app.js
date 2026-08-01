@@ -36,7 +36,7 @@ async function loadCategories() {
         <h3 class="section-heading">${sectionLabel(section)}</h3>
         <div class="category-grid">
           ${cats.map(cat => `
-            <div class="category-card" data-id="${cat.id}" data-name="${cat.name}">
+            <div class="category-card" data-id="${cat.id}" data-name="${cat.name}" data-section="${cat.section}">
               <h3>${cat.name}</h3>
             </div>
           `).join('')}
@@ -45,18 +45,30 @@ async function loadCategories() {
     `).join('');
 
     categoryList.querySelectorAll('.category-card').forEach(card => {
-      card.addEventListener('click', () => openCategory(card.dataset.id, card.dataset.name));
+      card.addEventListener('click', () => openCategory(card.dataset.id, card.dataset.name, card.dataset.section));
     });
   } catch (err) {
     categoryList.innerHTML = '<p class="muted">Could not load categories. Please refresh.</p>';
   }
 }
 
-async function openCategory(categoryId, categoryName) {
+async function openCategory(categoryId, categoryName, section) {
   categoriesSection.classList.add('hidden');
   nomineeSection.classList.remove('hidden');
   nomineeCategoryTitle.textContent = categoryName;
   nomineeList.innerHTML = '<p class="muted">Loading nominees…</p>';
+
+  const prizeBox = document.getElementById('prizeInfo');
+  if (section !== 'politics') {
+    prizeBox.innerHTML = `
+      <p><strong>Pos. 1</strong> — KSh 50,000 &nbsp;·&nbsp; <strong>Pos. 2</strong> — KSh 10,000</p>
+      <p>Any nominee with more than 4,000 votes wins KSh 100,000</p>
+    `;
+    prizeBox.classList.remove('hidden');
+  } else {
+    prizeBox.innerHTML = '';
+    prizeBox.classList.add('hidden');
+  }
 
   const res = await fetch(`${API_BASE}/categories/${categoryId}/nominees`);
   const nominees = await res.json();
