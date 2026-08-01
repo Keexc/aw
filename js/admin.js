@@ -152,6 +152,7 @@ async function loadNominees() {
         <td>${n.categoryName}</td>
         <td>${n.vote_count}</td>
         <td class="row-actions">
+          <button onclick="addVotesPrompt('${n.id}', '${n.full_name.replace(/'/g, "\\'")}')">Add votes</button>
           <button class="danger" onclick="deleteNominee('${n.id}')">Delete</button>
         </td>
       </tr>
@@ -162,6 +163,23 @@ window.deleteNominee = async (id) => {
   if (!confirm('Delete this nominee?')) return;
   await api(`/admin/nominees/${id}`, { method: 'DELETE' });
   loadNominees();
+};
+
+window.addVotesPrompt = (nomineeId, name) => {
+  openFormModal(`Add votes — ${name}`, `
+    <label class="field"><span>Number of votes</span><input id="f_votecount" type="number" min="1" value="1" /></label>
+    <label class="field"><span>Note (optional)</span><input id="f_votenote" placeholder="e.g. sponsor bonus, corrected missed payment" /></label>
+  `, async () => {
+    await api(`/admin/nominees/${nomineeId}/votes`, {
+      method: 'POST',
+      body: JSON.stringify({
+        count: Number(document.getElementById('f_votecount').value),
+        note: document.getElementById('f_votenote').value
+      })
+    });
+    loadNominees();
+    loadAnalytics();
+  });
 };
 
 document.getElementById('newNomineeBtn').addEventListener('click', () => {
