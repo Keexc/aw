@@ -137,12 +137,7 @@ document.getElementById('newCategoryBtn').addEventListener('click', () => {
 
 // ---- Nominees ----
 async function loadNominees() {
-  // Pull nominees across all categories via each category's public endpoint
-  const all = [];
-  for (const cat of categoriesCache) {
-    const nominees = await api(`/categories/${cat.id}/nominees`).catch(() => []);
-    nominees.forEach(n => all.push({ ...n, categoryName: cat.name }));
-  }
+  const all = await api('/admin/nominees-overview').catch(() => []);
   const table = document.getElementById('nomineeTable');
   table.innerHTML = `
     <tr><th>Name</th><th>Category</th><th>Votes</th><th></th></tr>
