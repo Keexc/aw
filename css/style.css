@@ -119,6 +119,28 @@ a { color: inherit; }
 }
 .btn-primary:hover { background: var(--gold-bright); }
 .btn-block { width: 100%; text-align: center; }
+.btn-loading {
+  position: relative;
+  color: transparent !important;
+  pointer-events: none;
+  opacity: 0.9;
+}
+.btn-loading::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border: 2px solid rgba(18,16,13,0.25);
+  border-top-color: var(--black);
+  border-radius: 50%;
+  animation: btn-spin 0.7s linear infinite;
+}
+@keyframes btn-spin {
+  to { transform: rotate(360deg); }
+}
 .btn-link {
   background: none;
   border: none;
