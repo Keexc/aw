@@ -174,7 +174,7 @@ function pollPaymentStatus() {
   let attempts = 0;
   pollTimer = setInterval(async () => {
     attempts += 1;
-    if (attempts > 20) { // ~60s timeout
+    if (attempts > 10) { // ~30s timeout
       clearInterval(pollTimer);
       setStatus('Still waiting on confirmation. If you completed payment, your vote will be credited shortly.', '');
       setButtonLoading(false);
