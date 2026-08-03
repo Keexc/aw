@@ -79,7 +79,6 @@ async function openCategory(categoryId, categoryName, section) {
       <div class="nominee-body">
         <h4>${n.full_name}</h4>
         <p class="nominee-org">${n.organization || ''}${n.organization && n.county ? ' · ' : ''}${n.county || ''}</p>
-        <p class="vote-count-line">${n.vote_count} vote${n.vote_count === 1 ? '' : 's'} so far</p>
         <button class="btn btn-primary btn-block" data-id="${n.id}" data-name="${n.full_name}">Vote for ${n.full_name.split(' ')[0]}</button>
       </div>
     </div>
@@ -103,7 +102,14 @@ const voteTotal = document.getElementById('voteTotal');
 const votePhone = document.getElementById('votePhone');
 const voteStatus = document.getElementById('voteStatus');
 const submitVoteBtn = document.getElementById('submitVote');
+const submitVoteBtnLabel = submitVoteBtn.textContent;
 const VOTE_PRICE = 20;
+
+function setButtonLoading(isLoading, label) {
+  submitVoteBtn.disabled = isLoading;
+  submitVoteBtn.classList.toggle('btn-loading', isLoading);
+  submitVoteBtn.textContent = isLoading ? (label || 'Sending…') : submitVoteBtnLabel;
+}
 
 function openVoteModal(nomineeId, name) {
   selectedNomineeId = nomineeId;
@@ -112,6 +118,7 @@ function openVoteModal(nomineeId, name) {
   votePhone.value = '';
   voteStatus.textContent = '';
   voteStatus.className = 'vote-status';
+  setButtonLoading(false);
   updateTotal();
   voteModal.classList.remove('hidden');
 }
@@ -136,7 +143,7 @@ submitVoteBtn.addEventListener('click', async () => {
     return;
   }
 
-  submitVoteBtn.disabled = true;
+  setButtonLoading(true, 'Sending prompt…');
   setStatus('Sending M-Pesa prompt to your phone…', '');
 
   try {
@@ -149,16 +156,17 @@ submitVoteBtn.addEventListener('click', async () => {
 
     if (!res.ok) {
       setStatus(data.error || 'Something went wrong. Please try again.', 'error');
-      submitVoteBtn.disabled = false;
+      setButtonLoading(false);
       return;
     }
 
     currentTransactionId = data.transactionId;
+    setButtonLoading(true, 'Waiting for payment…');
     setStatus('Check your phone and enter your M-Pesa PIN to complete the vote.', '');
     pollPaymentStatus();
   } catch (err) {
     setStatus('Network error. Please try again.', 'error');
-    submitVoteBtn.disabled = false;
+    setButtonLoading(false);
   }
 });
 
@@ -169,7 +177,7 @@ function pollPaymentStatus() {
     if (attempts > 20) { // ~60s timeout
       clearInterval(pollTimer);
       setStatus('Still waiting on confirmation. If you completed payment, your vote will be credited shortly.', '');
-      submitVoteBtn.disabled = false;
+      setButtonLoading(false);
       return;
     }
 
@@ -179,12 +187,12 @@ function pollPaymentStatus() {
     if (data.status === 'success') {
       clearInterval(pollTimer);
       setStatus(`Thank you! ${data.votes_requested} vote(s) recorded.`, 'success');
-      submitVoteBtn.disabled = false;
+      setButtonLoading(false);
       loadResults();
     } else if (data.status === 'failed') {
       clearInterval(pollTimer);
       setStatus('Payment was not completed. No votes were recorded.', 'error');
-      submitVoteBtn.disabled = false;
+      setButtonLoading(false);
     }
   }, 3000);
 }
