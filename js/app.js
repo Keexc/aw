@@ -12,19 +12,6 @@ let selectedNomineeId = null;
 let currentTransactionId = null;
 let pollTimer = null;
 
-// Wraps fetch with a timeout so a slow/cold-starting backend doesn't leave
-// the UI frozen with no feedback. Aborts the request after timeoutMs and
-// throws a standard AbortError, which callers can check via err.name.
-async function fetchWithTimeout(url, options = {}, timeoutMs = 12000) {
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    return await fetch(url, { ...options, signal: controller.signal });
-  } finally {
-    clearTimeout(id);
-  }
-}
-
 async function loadCategories() {
   try {
     const res = await fetch(`${API_BASE}/categories`);
@@ -161,15 +148,11 @@ submitVoteBtn.addEventListener('click', async () => {
   setStatus('Sending M-Pesa prompt to your phone…', '');
 
   try {
-    // The backend now responds as soon as the transaction is recorded and
-    // sends the STK push in the background, so this should return quickly.
-    // The 12s timeout here only guards against a cold-starting/unreachable
-    // backend, not against the M-Pesa prompt itself (that's handled by polling).
-    const res = await fetchWithTimeout(`${API_BASE}/payments/initiate`, {
+    const res = await fetch(`${API_BASE}/payments/initiate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ nomineeId: selectedNomineeId, phone, votes })
-    }, 12000);
+    });
     const data = await res.json();
 
     if (!res.ok) {
@@ -183,11 +166,7 @@ submitVoteBtn.addEventListener('click', async () => {
     setStatus('Check your phone and enter your M-Pesa PIN to complete the vote.', '');
     pollPaymentStatus();
   } catch (err) {
-    if (err.name === 'AbortError') {
-      setStatus('Server is taking a while to respond (it may be waking up). Please try again in a few seconds.', 'error');
-    } else {
-      setStatus('Network error. Please try again.', 'error');
-    }
+    setStatus('Network error. Please try again.', 'error');
     setButtonLoading(false);
   }
 });
@@ -203,22 +182,18 @@ function pollPaymentStatus() {
       return;
     }
 
-    try {
-      const res = await fetchWithTimeout(`${API_BASE}/payments/status/${currentTransactionId}`, {}, 8000);
-      const data = await res.json();
+    const res = await fetch(`${API_BASE}/payments/status/${currentTransactionId}`);
+    const data = await res.json();
 
-      if (data.status === 'success') {
-        clearInterval(pollTimer);
-        setStatus(`Thank you! ${data.votes_requested} vote(s) recorded.`, 'success');
-        setButtonLoading(false);
-        loadResults();
-      } else if (data.status === 'failed') {
-        clearInterval(pollTimer);
-        setStatus('Payment was not completed. No votes were recorded.', 'error');
-        setButtonLoading(false);
-      }
-    } catch (err) {
-      // A single slow/aborted poll isn't fatal — just let the next tick retry.
+    if (data.status === 'success') {
+      clearInterval(pollTimer);
+      setStatus(`Thank you! ${data.votes_requested} vote(s) recorded.`, 'success');
+      setButtonLoading(false);
+      loadResults();
+    } else if (data.status === 'failed') {
+      clearInterval(pollTimer);
+      setStatus('Payment was not completed. No votes were recorded.', 'error');
+      setButtonLoading(false);
     }
   }, 3000);
 }
