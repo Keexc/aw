@@ -197,17 +197,6 @@ a { color: inherit; }
 }
 .category-card h3 { margin: 8px 0 0; font-size: 1.05rem; }
 
-.prize-info {
-  background: linear-gradient(90deg, rgba(20,107,58,0.08), rgba(201,162,39,0.12));
-  border: 1px solid var(--gold);
-  border-radius: 6px;
-  padding: 14px 18px;
-  margin: 0 0 24px;
-  font-size: 0.88rem;
-}
-.prize-info p { margin: 4px 0; }
-.prize-info strong { color: var(--green); }
-
 /* Nominee grid */
 .nominee-grid {
   display: grid;
