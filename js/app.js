@@ -79,6 +79,7 @@ async function openCategory(categoryId, categoryName, section) {
       <div class="nominee-body">
         <h4>${n.full_name}</h4>
         <p class="nominee-org">${n.organization || ''}${n.organization && n.county ? ' · ' : ''}${n.county || ''}</p>
+        <p class="vote-count-line">${n.vote_count} vote${n.vote_count === 1 ? '' : 's'} so far</p>
         <button class="btn btn-primary btn-block" data-id="${n.id}" data-name="${n.full_name}">Vote for ${n.full_name.split(' ')[0]}</button>
       </div>
     </div>
@@ -174,7 +175,7 @@ function pollPaymentStatus() {
   let attempts = 0;
   pollTimer = setInterval(async () => {
     attempts += 1;
-    if (attempts > 20) { // ~60s timeout
+    if (attempts > 10) { // ~30s timeout
       clearInterval(pollTimer);
       setStatus('Still waiting on confirmation. If you completed payment, your vote will be credited shortly.', '');
       setButtonLoading(false);
