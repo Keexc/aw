@@ -136,7 +136,7 @@ a { color: inherit; }
   border: 2px solid rgba(18,16,13,0.25);
   border-top-color: var(--black);
   border-radius: 50%;
-  animation: btn-spin 0.7s linear infinite;
+  animation: btn-spin 0.45s linear infinite;
 }
 @keyframes btn-spin {
   to { transform: rotate(360deg); }
