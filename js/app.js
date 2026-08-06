@@ -58,18 +58,6 @@ async function openCategory(categoryId, categoryName, section) {
   nomineeCategoryTitle.textContent = categoryName;
   nomineeList.innerHTML = '<p class="muted">Loading nominees…</p>';
 
-  const prizeBox = document.getElementById('prizeInfo');
-  if (section !== 'politics') {
-    prizeBox.innerHTML = `
-      <p><strong>Pos. 1</strong> — KSh 50,000 &nbsp;·&nbsp; <strong>Pos. 2</strong> — KSh 10,000</p>
-      <p>Any nominee with more than 4,000 votes wins KSh 100,000</p>
-    `;
-    prizeBox.classList.remove('hidden');
-  } else {
-    prizeBox.innerHTML = '';
-    prizeBox.classList.add('hidden');
-  }
-
   const res = await fetch(`${API_BASE}/categories/${categoryId}/nominees`);
   const nominees = await res.json();
 
