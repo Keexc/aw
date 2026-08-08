@@ -92,7 +92,7 @@ const votePhone = document.getElementById('votePhone');
 const voteStatus = document.getElementById('voteStatus');
 const submitVoteBtn = document.getElementById('submitVote');
 const submitVoteBtnLabel = submitVoteBtn.textContent;
-const VOTE_PRICE = 20;
+const VOTE_PRICE = 10;
 
 function setButtonLoading(isLoading, label) {
   submitVoteBtn.disabled = isLoading;
