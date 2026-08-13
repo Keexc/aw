@@ -238,12 +238,22 @@ a { color: inherit; }
 }
 
 /* Sponsor Free Voting Day */
-.sponsor-link {
+.btn-sponsor {
   display: block;
-  margin: 4px 0 20px;
-  color: var(--gold);
-  font-size: 0.85rem;
+  width: 100%;
+  margin: 4px 0 24px;
+  padding: 12px 20px;
+  background: white;
+  border: 2px solid var(--gold);
+  color: var(--black);
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.15s;
 }
+.btn-sponsor:hover { background: rgba(201,162,39,0.12); }
 .free-day-banner {
   background: linear-gradient(90deg, rgba(230,193,92,0.18), rgba(20,107,58,0.1));
   border: 1px solid var(--gold);
