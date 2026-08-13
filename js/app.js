@@ -11,11 +11,15 @@ const resultsList = document.getElementById('resultsList');
 let selectedNomineeId = null;
 let currentTransactionId = null;
 let pollTimer = null;
+let categoriesCache = [];
+let currentCategoryId = null;
+let currentCategoryIsFree = false;
 
 async function loadCategories() {
   try {
     const res = await fetch(`${API_BASE}/categories`);
     const categories = await res.json();
+    categoriesCache = categories;
 
     if (!categories.length) {
       categoryList.innerHTML = '<p class="muted">No categories open for voting yet.</p>';
@@ -38,6 +42,7 @@ async function loadCategories() {
           ${cats.map(cat => `
             <div class="category-card" data-id="${cat.id}" data-name="${cat.name}" data-section="${cat.section}">
               <h3>${cat.name}</h3>
+              ${cat.is_free_today ? '<span class="free-tag">Free voting today!</span>' : ''}
             </div>
           `).join('')}
         </div>
@@ -58,6 +63,19 @@ async function openCategory(categoryId, categoryName, section) {
   nomineeCategoryTitle.textContent = categoryName;
   nomineeList.innerHTML = '<p class="muted">Loading nominees…</p>';
 
+  currentCategoryId = categoryId;
+  const cachedCat = categoriesCache.find(c => c.id === categoryId);
+  currentCategoryIsFree = Boolean(cachedCat?.is_free_today);
+
+  const banner = document.getElementById('freeDayBanner');
+  if (currentCategoryIsFree) {
+    banner.innerHTML = '🎉 <strong>Free Voting Day!</strong> Voting in this category is free today — thanks to a sponsor.';
+    banner.classList.remove('hidden');
+  } else {
+    banner.innerHTML = '';
+    banner.classList.add('hidden');
+  }
+
   const res = await fetch(`${API_BASE}/categories/${categoryId}/nominees`);
   const nominees = await res.json();
 
@@ -68,7 +86,9 @@ async function openCategory(categoryId, categoryName, section) {
         <h4>${n.full_name}</h4>
         <p class="nominee-org">${n.organization || ''}${n.organization && n.county ? ' · ' : ''}${n.county || ''}</p>
         <p class="vote-count-line">${n.vote_count} vote${n.vote_count === 1 ? '' : 's'} so far</p>
-        <button class="btn btn-primary btn-block" data-id="${n.id}" data-name="${n.full_name}">Vote for ${n.full_name.split(' ')[0]}</button>
+        <button class="btn btn-primary btn-block" data-id="${n.id}" data-name="${n.full_name}">
+          ${currentCategoryIsFree ? `Vote free for ${n.full_name.split(' ')[0]}` : `Vote for ${n.full_name.split(' ')[0]}`}
+        </button>
       </div>
     </div>
   `).join('');
@@ -91,7 +111,7 @@ const voteTotal = document.getElementById('voteTotal');
 const votePhone = document.getElementById('votePhone');
 const voteStatus = document.getElementById('voteStatus');
 const submitVoteBtn = document.getElementById('submitVote');
-const submitVoteBtnLabel = submitVoteBtn.textContent;
+let submitVoteBtnLabel = submitVoteBtn.textContent;
 const VOTE_PRICE = 10;
 
 function setButtonLoading(isLoading, label) {
@@ -109,12 +129,14 @@ function openVoteModal(nomineeId, name) {
   voteStatus.className = 'vote-status';
   setButtonLoading(false);
   updateTotal();
+  submitVoteBtnLabel = currentCategoryIsFree ? 'Confirm Free Vote' : 'Pay with M-Pesa';
+  submitVoteBtn.textContent = submitVoteBtnLabel;
   voteModal.classList.remove('hidden');
 }
 
 function updateTotal() {
   const count = Math.max(1, parseInt(voteCountInput.value, 10) || 1);
-  voteTotal.textContent = `KSh ${count * VOTE_PRICE}`;
+  voteTotal.textContent = currentCategoryIsFree ? 'FREE today' : `KSh ${count * VOTE_PRICE}`;
 }
 voteCountInput.addEventListener('input', updateTotal);
 
@@ -146,6 +168,14 @@ submitVoteBtn.addEventListener('click', async () => {
     if (!res.ok) {
       setStatus(data.error || 'Something went wrong. Please try again.', 'error');
       setButtonLoading(false);
+      return;
+    }
+
+    if (data.free) {
+      setStatus(data.message, 'success');
+      setButtonLoading(false);
+      loadResults();
+      loadCategories();
       return;
     }
 
@@ -219,3 +249,114 @@ async function loadResults() {
 loadCategories();
 loadResults();
 setInterval(loadResults, 15000); // keep the public leaderboard fresh
+
+// ---- Sponsor Free Voting Day ----
+const sponsorModal = document.getElementById('sponsorModal');
+const sponsorCategoryLabel = document.getElementById('sponsorCategoryLabel');
+const sponsorDaysInput = document.getElementById('sponsorDays');
+const sponsorTotal = document.getElementById('sponsorTotal');
+const sponsorPhone = document.getElementById('sponsorPhone');
+const sponsorStatus = document.getElementById('sponsorStatus');
+const submitSponsorBtn = document.getElementById('submitSponsor');
+let submitSponsorBtnLabel = submitSponsorBtn.textContent;
+const SPONSOR_DAY_PRICE = 50000;
+let sponsorPollTimer = null;
+let currentSponsorshipId = null;
+
+function setSponsorButtonLoading(isLoading, label) {
+  submitSponsorBtn.disabled = isLoading;
+  submitSponsorBtn.classList.toggle('btn-loading', isLoading);
+  submitSponsorBtn.textContent = isLoading ? (label || 'Sending…') : submitSponsorBtnLabel;
+}
+
+function updateSponsorTotal() {
+  const days = Math.max(1, parseInt(sponsorDaysInput.value, 10) || 1);
+  sponsorTotal.textContent = `KSh ${(days * SPONSOR_DAY_PRICE).toLocaleString()}`;
+}
+sponsorDaysInput.addEventListener('input', updateSponsorTotal);
+
+document.getElementById('sponsorDayBtn').addEventListener('click', () => {
+  if (!currentCategoryId) return;
+  sponsorCategoryLabel.textContent = nomineeCategoryTitle.textContent;
+  sponsorDaysInput.value = 1;
+  sponsorPhone.value = '';
+  sponsorStatus.textContent = '';
+  sponsorStatus.className = 'vote-status';
+  setSponsorButtonLoading(false);
+  updateSponsorTotal();
+  sponsorModal.classList.remove('hidden');
+});
+
+document.getElementById('closeSponsorModal').addEventListener('click', () => {
+  clearInterval(sponsorPollTimer);
+  sponsorModal.classList.add('hidden');
+});
+
+function setSponsorStatus(msg, type) {
+  sponsorStatus.textContent = msg;
+  sponsorStatus.className = `vote-status ${type}`;
+}
+
+submitSponsorBtn.addEventListener('click', async () => {
+  const days = Math.max(1, parseInt(sponsorDaysInput.value, 10) || 1);
+  const phone = sponsorPhone.value.trim();
+
+  if (!/^0(7|1)\d{8}$/.test(phone) && !/^254(7|1)\d{8}$/.test(phone)) {
+    setSponsorStatus('Enter a valid Safaricom number, e.g. 07XXXXXXXX', 'error');
+    return;
+  }
+
+  setSponsorButtonLoading(true, 'Sending prompt…');
+  setSponsorStatus('Sending M-Pesa prompt to your phone…', '');
+
+  try {
+    const res = await fetch(`${API_BASE}/sponsorship/initiate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ categoryId: currentCategoryId, days, phone })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      setSponsorStatus(data.error || 'Something went wrong. Please try again.', 'error');
+      setSponsorButtonLoading(false);
+      return;
+    }
+
+    currentSponsorshipId = data.sponsorshipId;
+    setSponsorButtonLoading(true, 'Waiting for payment…');
+    setSponsorStatus('Check your phone and enter your M-Pesa PIN to complete the sponsorship.', '');
+    pollSponsorshipStatus();
+  } catch (err) {
+    setSponsorStatus('Network error. Please try again.', 'error');
+    setSponsorButtonLoading(false);
+  }
+});
+
+function pollSponsorshipStatus() {
+  let attempts = 0;
+  sponsorPollTimer = setInterval(async () => {
+    attempts += 1;
+    if (attempts > 10) { // ~30s timeout
+      clearInterval(sponsorPollTimer);
+      setSponsorStatus('Still waiting on confirmation. If you completed payment, the free voting day will start shortly.', '');
+      setSponsorButtonLoading(false);
+      return;
+    }
+
+    const res = await fetch(`${API_BASE}/sponsorship/status/${currentSponsorshipId}`);
+    const data = await res.json();
+
+    if (data.status === 'success') {
+      clearInterval(sponsorPollTimer);
+      setSponsorStatus(`Thank you! Voting is now free for this category for the next ${data.days} day(s).`, 'success');
+      setSponsorButtonLoading(false);
+      loadCategories();
+      if (currentCategoryId) openCategory(currentCategoryId, nomineeCategoryTitle.textContent);
+    } else if (data.status === 'failed') {
+      clearInterval(sponsorPollTimer);
+      setSponsorStatus('Payment was not completed. Sponsorship was not activated.', 'error');
+      setSponsorButtonLoading(false);
+    }
+  }, 3000);
+}
