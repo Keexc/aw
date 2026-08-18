@@ -15,6 +15,30 @@ let categoriesCache = [];
 let currentCategoryId = null;
 let currentCategoryIsFree = false;
 
+let countdownTimer = null;
+
+function startCountdowns() {
+  clearInterval(countdownTimer);
+  tickCountdowns();
+  countdownTimer = setInterval(tickCountdowns, 1000);
+}
+
+function tickCountdowns() {
+  document.querySelectorAll('.countdown[data-ends]').forEach(el => {
+    const diff = new Date(el.dataset.ends).getTime() - Date.now();
+    if (diff <= 0) {
+      el.textContent = 'Voting closed';
+      el.classList.add('countdown-closed');
+      return;
+    }
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    el.textContent = `${d}D ${h}H ${m}m ${s}S`;
+  });
+}
+
 async function loadCategories() {
   try {
     const res = await fetch(`${API_BASE}/categories`);
@@ -43,11 +67,14 @@ async function loadCategories() {
             <div class="category-card" data-id="${cat.id}" data-name="${cat.name}" data-section="${cat.section}">
               <h3>${cat.name}</h3>
               ${cat.is_free_today ? '<span class="free-tag">Free voting today!</span>' : ''}
+              ${cat.voting_ends_at ? `<div class="countdown" data-ends="${cat.voting_ends_at}">--</div>` : ''}
             </div>
           `).join('')}
         </div>
       </div>
     `).join('');
+
+    startCountdowns();
 
     categoryList.querySelectorAll('.category-card').forEach(card => {
       card.addEventListener('click', () => openCategory(card.dataset.id, card.dataset.name, card.dataset.section));
@@ -246,10 +273,92 @@ async function loadResults() {
   `).join('');
 }
 
+// ---- Apply for Nomination ----
 loadCategories();
 loadResults();
 setInterval(loadResults, 15000); // keep the public leaderboard fresh
 
+const nominationModal = document.getElementById('nominationModal');
+const nomName = document.getElementById('nomName');
+const nomCategory = document.getElementById('nomCategory');
+const nomEmail = document.getElementById('nomEmail');
+const nomPhone = document.getElementById('nomPhone');
+const nominationStatus = document.getElementById('nominationStatus');
+const submitNominationBtn = document.getElementById('submitNomination');
+let submitNominationBtnLabel = submitNominationBtn.textContent;
+
+function setNominationButtonLoading(isLoading, label) {
+  submitNominationBtn.disabled = isLoading;
+  submitNominationBtn.classList.toggle('btn-loading', isLoading);
+  submitNominationBtn.textContent = isLoading ? (label || 'Submitting…') : submitNominationBtnLabel;
+}
+
+document.getElementById('applyNominationBtn').addEventListener('click', () => {
+  nomName.value = '';
+  nomEmail.value = '';
+  nomPhone.value = '';
+  nominationStatus.textContent = '';
+  nominationStatus.className = 'vote-status';
+  setNominationButtonLoading(false);
+
+  nomCategory.innerHTML = categoriesCache
+    .map(cat => `<option value="${cat.id}">${cat.name}</option>`)
+    .join('');
+
+  nominationModal.classList.remove('hidden');
+});
+
+document.getElementById('closeNominationModal').addEventListener('click', () => {
+  nominationModal.classList.add('hidden');
+});
+
+document.getElementById('giveUpNomination').addEventListener('click', () => {
+  nominationModal.classList.add('hidden');
+});
+
+submitNominationBtn.addEventListener('click', async () => {
+  const fullName = nomName.value.trim();
+  const email = nomEmail.value.trim();
+  const phone = nomPhone.value.trim();
+  const categoryId = nomCategory.value;
+
+  if (!fullName) {
+    nominationStatus.textContent = 'Enter your full name';
+    nominationStatus.className = 'vote-status error';
+    return;
+  }
+  if (!/^0(7|1)\d{8}$/.test(phone) && !/^254(7|1)\d{8}$/.test(phone)) {
+    nominationStatus.textContent = 'Enter a valid Safaricom number, e.g. 07XXXXXXXX';
+    nominationStatus.className = 'vote-status error';
+    return;
+  }
+
+  setNominationButtonLoading(true, 'Submitting…');
+
+  try {
+    const res = await fetch(`${API_BASE}/nominations/apply`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fullName, email: email || undefined, phone, categoryId })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      nominationStatus.textContent = data.error || 'Something went wrong. Please try again.';
+      nominationStatus.className = 'vote-status error';
+      setNominationButtonLoading(false);
+      return;
+    }
+
+    nominationStatus.textContent = data.message;
+    nominationStatus.className = 'vote-status success';
+    setNominationButtonLoading(false);
+  } catch (err) {
+    nominationStatus.textContent = 'Network error. Please try again.';
+    nominationStatus.className = 'vote-status error';
+    setNominationButtonLoading(false);
+  }
+});
 // ---- Sponsor Free Voting Day ----
 const sponsorModal = document.getElementById('sponsorModal');
 const sponsorCategoryLabel = document.getElementById('sponsorCategoryLabel');

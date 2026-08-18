@@ -274,6 +274,14 @@ a { color: inherit; }
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
+.countdown {
+  margin-top: 10px;
+  font-family: 'SF Mono', Menlo, monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--green);
+}
+.countdown-closed { color: rgba(18,16,13,0.5); font-family: var(--font-body); }
 
 /* Results */
 .result-category { margin-bottom: 36px; }
@@ -338,6 +346,22 @@ a { color: inherit; }
   font-size: 0.95rem;
   font-family: var(--font-body);
 }
+.prize-callout {
+  background: rgba(201,162,39,0.12);
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  margin-bottom: 18px;
+}
+.prize-callout strong { color: var(--green); }
+.give-up-link {
+  display: block;
+  text-align: center;
+  margin-top: 10px;
+  color: rgba(18,16,13,0.5);
+}
+
 .total-line { font-size: 0.95rem; margin-bottom: 18px; }
 .vote-status { font-size: 0.85rem; margin-top: 12px; min-height: 1.2em; }
 .vote-status.error { color: #B3261E; }

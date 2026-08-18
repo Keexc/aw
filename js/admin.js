@@ -59,6 +59,7 @@ function showDashboard() {
   loadCategories();
   loadNominees();
   loadTransactions();
+  loadNominations();
 }
 
 if (token) showDashboard();
@@ -86,20 +87,35 @@ async function loadCategories() {
   categoriesCache = data;
   const table = document.getElementById('categoryTable');
   table.innerHTML = `
-    <tr><th>Name</th><th>Section</th><th>Voting open</th><th></th></tr>
+    <tr><th>Name</th><th>Section</th><th>Voting open</th><th>Countdown ends</th><th></th></tr>
     ${data.map(c => `
       <tr>
         <td>${c.name}</td>
         <td>${c.section}</td>
         <td>${c.is_active ? 'Open' : 'Closed'}</td>
+        <td>${c.voting_ends_at ? new Date(c.voting_ends_at).toLocaleString() : '—'}</td>
         <td class="row-actions">
           <button onclick="toggleVoting('${c.id}', ${!c.is_active})">${c.is_active ? 'Close voting' : 'Open voting'}</button>
+          <button onclick="setCountdownPrompt('${c.id}', '${c.name.replace(/'/g, "\\'")}')">Set countdown</button>
           <button class="danger" onclick="deleteCategory('${c.id}')">Delete</button>
         </td>
       </tr>
     `).join('')}
   `;
 }
+
+window.setCountdownPrompt = (categoryId, name) => {
+  openFormModal(`Set countdown — ${name}`, `
+    <label class="field"><span>Voting ends at</span><input id="f_countdown" type="datetime-local" /></label>
+  `, async () => {
+    const value = document.getElementById('f_countdown').value;
+    await api(`/admin/categories/${categoryId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ voting_ends_at: value ? new Date(value).toISOString() : null })
+    });
+    loadCategories();
+  });
+};
 
 window.toggleVoting = async (id, newState) => {
   await api(`/admin/categories/${id}/toggle-voting`, { method: 'PATCH', body: JSON.stringify({ is_active: newState }) });
@@ -122,13 +138,16 @@ document.getElementById('newCategoryBtn').addEventListener('click', () => {
     </label>
     <label class="field"><span>Category name</span><input id="f_name" placeholder="e.g. Best Radio Presenter" /></label>
     <label class="field"><span>Display order</span><input id="f_order" type="number" value="0" /></label>
+    <label class="field"><span>Voting ends at (optional)</span><input id="f_countdown_new" type="datetime-local" /></label>
   `, async () => {
+    const countdownValue = document.getElementById('f_countdown_new').value;
     await api('/admin/categories', {
       method: 'POST',
       body: JSON.stringify({
         name: document.getElementById('f_name').value,
         section: document.getElementById('f_section').value,
-        display_order: Number(document.getElementById('f_order').value)
+        display_order: Number(document.getElementById('f_order').value),
+        voting_ends_at: countdownValue ? new Date(countdownValue).toISOString() : null
       })
     });
     loadCategories();
@@ -277,3 +296,44 @@ function openFormModal(title, bodyHtml, onSubmit) {
     }
   });
 }
+
+// ---- Nomination applications ----
+async function loadNominations() {
+  const data = await api('/admin/nominations?status=pending').catch(() => []);
+  const table = document.getElementById('nominationTable');
+
+  if (!data.length) {
+    table.innerHTML = '<tr><td class="muted">No pending applications.</td></tr>';
+    return;
+  }
+
+  table.innerHTML = `
+    <tr><th>Name</th><th>Category</th><th>Email</th><th>Phone</th><th>Applied</th><th></th></tr>
+    ${data.map(a => `
+      <tr>
+        <td>${a.full_name}</td>
+        <td>${a.categoryName}</td>
+        <td>${a.email || '—'}</td>
+        <td>${a.phone_number}</td>
+        <td>${new Date(a.created_at).toLocaleString()}</td>
+        <td class="row-actions">
+          <button onclick="acceptNomination('${a.id}')">Accept</button>
+          <button class="danger" onclick="rejectNomination('${a.id}')">Reject</button>
+        </td>
+      </tr>
+    `).join('')}
+  `;
+}
+
+window.acceptNomination = async (id) => {
+  if (!confirm('Accept this application and add them as a nominee?')) return;
+  await api(`/admin/nominations/${id}/accept`, { method: 'POST' });
+  loadNominations();
+  loadNominees();
+};
+
+window.rejectNomination = async (id) => {
+  if (!confirm('Reject this application?')) return;
+  await api(`/admin/nominations/${id}/reject`, { method: 'POST' });
+  loadNominations();
+};
