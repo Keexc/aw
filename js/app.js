@@ -14,6 +14,7 @@ let pollTimer = null;
 let categoriesCache = [];
 let currentCategoryId = null;
 let currentCategoryIsFree = false;
+let currentCategoryClosed = false;
 
 let countdownTimer = null;
 
@@ -93,9 +94,13 @@ async function openCategory(categoryId, categoryName, section) {
   currentCategoryId = categoryId;
   const cachedCat = categoriesCache.find(c => c.id === categoryId);
   currentCategoryIsFree = Boolean(cachedCat?.is_free_today);
+  currentCategoryClosed = Boolean(cachedCat?.voting_ends_at && new Date(cachedCat.voting_ends_at) <= new Date());
 
   const banner = document.getElementById('freeDayBanner');
-  if (currentCategoryIsFree) {
+  if (currentCategoryClosed) {
+    banner.innerHTML = '⏱️ <strong>Voting has closed</strong> for this category.';
+    banner.classList.remove('hidden');
+  } else if (currentCategoryIsFree) {
     banner.innerHTML = '🎉 <strong>Free Voting Day!</strong> Voting in this category is free today — thanks to a sponsor.';
     banner.classList.remove('hidden');
   } else {
@@ -113,14 +118,14 @@ async function openCategory(categoryId, categoryName, section) {
         <h4>${n.full_name}</h4>
         <p class="nominee-org">${n.organization || ''}${n.organization && n.county ? ' · ' : ''}${n.county || ''}</p>
         <p class="vote-count-line">${n.vote_count} vote${n.vote_count === 1 ? '' : 's'} so far</p>
-        <button class="btn btn-primary btn-block" data-id="${n.id}" data-name="${n.full_name}">
-          ${currentCategoryIsFree ? `Vote free for ${n.full_name.split(' ')[0]}` : `Vote for ${n.full_name.split(' ')[0]}`}
+        <button class="btn btn-primary btn-block" data-id="${n.id}" data-name="${n.full_name}" ${currentCategoryClosed ? 'disabled' : ''}>
+          ${currentCategoryClosed ? 'Voting closed' : currentCategoryIsFree ? `Vote free for ${n.full_name.split(' ')[0]}` : `Vote for ${n.full_name.split(' ')[0]}`}
         </button>
       </div>
     </div>
   `).join('');
 
-  nomineeList.querySelectorAll('button[data-id]').forEach(btn => {
+  nomineeList.querySelectorAll('button[data-id]:not([disabled])').forEach(btn => {
     btn.addEventListener('click', () => openVoteModal(btn.dataset.id, btn.dataset.name));
   });
 }
