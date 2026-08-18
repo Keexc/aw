@@ -293,7 +293,7 @@ function setNominationButtonLoading(isLoading, label) {
   submitNominationBtn.textContent = isLoading ? (label || 'Submitting…') : submitNominationBtnLabel;
 }
 
-document.getElementById('applyNominationBtn').addEventListener('click', () => {
+function openNominationModal(preselectCategoryId) {
   nomName.value = '';
   nomEmail.value = '';
   nomPhone.value = '';
@@ -305,8 +305,13 @@ document.getElementById('applyNominationBtn').addEventListener('click', () => {
     .map(cat => `<option value="${cat.id}">${cat.name}</option>`)
     .join('');
 
+  if (preselectCategoryId) nomCategory.value = preselectCategoryId;
+
   nominationModal.classList.remove('hidden');
-});
+}
+
+document.getElementById('applyNominationBtn').addEventListener('click', () => openNominationModal());
+document.getElementById('applyNominationBtnInCategory').addEventListener('click', () => openNominationModal(currentCategoryId));
 
 document.getElementById('closeNominationModal').addEventListener('click', () => {
   nominationModal.classList.add('hidden');
