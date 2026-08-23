@@ -288,6 +288,7 @@ const nomName = document.getElementById('nomName');
 const nomCategory = document.getElementById('nomCategory');
 const nomEmail = document.getElementById('nomEmail');
 const nomPhone = document.getElementById('nomPhone');
+const nomWhatsapp = document.getElementById('nomWhatsapp');
 const nominationStatus = document.getElementById('nominationStatus');
 const submitNominationBtn = document.getElementById('submitNomination');
 let submitNominationBtnLabel = submitNominationBtn.textContent;
@@ -302,6 +303,7 @@ function openNominationModal(preselectCategoryId) {
   nomName.value = '';
   nomEmail.value = '';
   nomPhone.value = '';
+  nomWhatsapp.value = '';
   nominationStatus.textContent = '';
   nominationStatus.className = 'vote-status';
   setNominationButtonLoading(false);
@@ -335,6 +337,7 @@ submitNominationBtn.addEventListener('click', async () => {
   const fullName = nomName.value.trim();
   const email = nomEmail.value.trim();
   const phone = nomPhone.value.trim();
+  const whatsapp = nomWhatsapp.value.trim();
   const categoryId = nomCategory.value;
 
   if (!fullName) {
@@ -356,7 +359,7 @@ submitNominationBtn.addEventListener('click', async () => {
     const res = await fetch(`${API_BASE}/nominations/apply`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fullName, email: email || undefined, phone, categoryId })
+      body: JSON.stringify({ fullName, email: email || undefined, phone, whatsapp: whatsapp || undefined, categoryId })
     });
     const data = await res.json();
 

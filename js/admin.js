@@ -308,13 +308,14 @@ async function loadNominations() {
   }
 
   table.innerHTML = `
-    <tr><th>Name</th><th>Category</th><th>Email</th><th>Phone</th><th>Applied</th><th></th></tr>
+    <tr><th>Name</th><th>Category</th><th>Email</th><th>M-Pesa Phone</th><th>WhatsApp</th><th>Applied</th><th></th></tr>
     ${data.map(a => `
       <tr>
         <td>${a.full_name}</td>
         <td>${a.categoryName}</td>
         <td>${a.email || '—'}</td>
         <td>${a.phone_number}</td>
+        <td>${a.whatsapp_number || '—'}</td>
         <td>${new Date(a.created_at).toLocaleString()}</td>
         <td class="row-actions">
           <button onclick="acceptNomination('${a.id}')">Accept</button>
