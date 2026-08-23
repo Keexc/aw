@@ -350,6 +350,11 @@ submitNominationBtn.addEventListener('click', async () => {
     nominationStatus.className = 'vote-status error';
     return;
   }
+  if (!/^0(7|1)\d{8}$/.test(whatsapp) && !/^254(7|1)\d{8}$/.test(whatsapp)) {
+    nominationStatus.textContent = 'Enter a valid WhatsApp number, e.g. 07XXXXXXXX';
+    nominationStatus.className = 'vote-status error';
+    return;
+  }
 
   setNominationButtonLoading(true, 'Sending prompt…');
   nominationStatus.textContent = 'Sending M-Pesa prompt to your phone…';
@@ -359,7 +364,7 @@ submitNominationBtn.addEventListener('click', async () => {
     const res = await fetch(`${API_BASE}/nominations/apply`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fullName, email: email || undefined, phone, whatsapp: whatsapp || undefined, categoryId })
+      body: JSON.stringify({ fullName, email: email || undefined, phone, whatsapp, categoryId })
     });
     const data = await res.json();
 
