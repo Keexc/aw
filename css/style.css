@@ -283,6 +283,14 @@ a { color: inherit; }
 }
 .countdown-closed { color: rgba(18,16,13,0.5); font-family: var(--font-body); }
 
+/* About */
+.about-section p {
+  max-width: 68ch;
+  line-height: 1.7;
+  margin-bottom: 16px;
+  color: rgba(18,16,13,0.85);
+}
+
 /* Results */
 .result-category { margin-bottom: 36px; }
 .result-category h3 { font-size: 1.15rem; margin-bottom: 4px; }

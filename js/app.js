@@ -319,12 +319,17 @@ document.getElementById('applyNominationBtn').addEventListener('click', () => op
 document.getElementById('applyNominationBtnInCategory').addEventListener('click', () => openNominationModal(currentCategoryId));
 
 document.getElementById('closeNominationModal').addEventListener('click', () => {
+  clearInterval(nominationPollTimer);
   nominationModal.classList.add('hidden');
 });
 
 document.getElementById('giveUpNomination').addEventListener('click', () => {
+  clearInterval(nominationPollTimer);
   nominationModal.classList.add('hidden');
 });
+
+let nominationPollTimer = null;
+let currentApplicationId = null;
 
 submitNominationBtn.addEventListener('click', async () => {
   const fullName = nomName.value.trim();
@@ -343,7 +348,9 @@ submitNominationBtn.addEventListener('click', async () => {
     return;
   }
 
-  setNominationButtonLoading(true, 'Submitting…');
+  setNominationButtonLoading(true, 'Sending prompt…');
+  nominationStatus.textContent = 'Sending M-Pesa prompt to your phone…';
+  nominationStatus.className = 'vote-status';
 
   try {
     const res = await fetch(`${API_BASE}/nominations/apply`, {
@@ -360,15 +367,46 @@ submitNominationBtn.addEventListener('click', async () => {
       return;
     }
 
-    nominationStatus.textContent = data.message;
-    nominationStatus.className = 'vote-status success';
-    setNominationButtonLoading(false);
+    currentApplicationId = data.applicationId;
+    setNominationButtonLoading(true, 'Waiting for payment…');
+    nominationStatus.textContent = 'Check your phone and enter your M-Pesa PIN to pay the KSh 200 application fee.';
+    pollApplicationStatus();
   } catch (err) {
     nominationStatus.textContent = 'Network error. Please try again.';
     nominationStatus.className = 'vote-status error';
     setNominationButtonLoading(false);
   }
 });
+
+function pollApplicationStatus() {
+  let attempts = 0;
+  nominationPollTimer = setInterval(async () => {
+    attempts += 1;
+    if (attempts > 10) { // ~30s timeout
+      clearInterval(nominationPollTimer);
+      nominationStatus.textContent = 'Still waiting on confirmation. If you completed payment, your application will go through shortly.';
+      nominationStatus.className = 'vote-status';
+      setNominationButtonLoading(false);
+      return;
+    }
+
+    const res = await fetch(`${API_BASE}/nominations/status/${currentApplicationId}`);
+    const data = await res.json();
+
+    if (data.payment_status === 'success') {
+      clearInterval(nominationPollTimer);
+      nominationStatus.textContent = 'Payment received! Your application has been submitted for review.';
+      nominationStatus.className = 'vote-status success';
+      setNominationButtonLoading(false);
+    } else if (data.payment_status === 'failed') {
+      clearInterval(nominationPollTimer);
+      nominationStatus.textContent = 'Payment was not completed. Your application was not submitted.';
+      nominationStatus.className = 'vote-status error';
+      setNominationButtonLoading(false);
+    }
+  }, 3000);
+}
+
 // ---- Sponsor Free Voting Day ----
 const sponsorModal = document.getElementById('sponsorModal');
 const sponsorCategoryLabel = document.getElementById('sponsorCategoryLabel');

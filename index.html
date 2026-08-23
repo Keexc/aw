@@ -19,6 +19,7 @@
     <nav class="header-nav">
       <a href="#categories">Categories</a>
       <a href="#results">Results</a>
+      <a href="#about">About</a>
       <a href="admin.html">Admin</a>
     </nav>
   </div>
@@ -58,6 +59,14 @@
     <div id="resultsList"></div>
   </section>
 
+  <section id="about" class="section about-section">
+    <h2>About Kenyan Excellence Awards</h2>
+    <p>Kenyan Excellence Awards is a public voting platform built to recognize people making a real impact across Kenya — in entertainment, media, and public life. Anyone can nominate someone they admire, and the public decides who stands out through open, transparent voting.</p>
+    <p>We believe recognition matters. Whether it's a radio presenter connecting with listeners every morning, an artist shaping the sound of a generation, or a public figure serving their community, we want their work seen and celebrated by the people who follow it.</p>
+    <p>Every vote is KSh 20, cast securely by M-Pesa, and counted publicly in real time — no hidden tallies. Categories can also be sponsored for a Free Voting Day, opening participation to everyone at no cost. Nominees who reach strong support are recognized with real prizes, up to KSh 500,000 for reaching 7,000 votes in a category.</p>
+    <p>This platform is new and growing. We're building it openly, category by category, and we invite the public, nominees, and sponsors to be part of shaping what it becomes.</p>
+  </section>
+
 </main>
 
 <!-- Vote modal -->
@@ -89,15 +98,16 @@
     <button id="closeNominationModal" class="modal-close">&times;</button>
     <h3>Apply for Nomination</h3>
     <p class="prize-callout">🏆 Win up to <strong>KSh 500,000</strong> for reaching <strong>7,000 votes</strong> — KSh 20 per vote</p>
+    <p class="muted">KSh 200 application fee, paid via M-Pesa</p>
 
     <label class="field"><span>Your full name</span><input id="nomName" placeholder="e.g. Jane Wanjiru" /></label>
     <label class="field"><span>Category</span>
       <select id="nomCategory"></select>
     </label>
     <label class="field"><span>Email (optional)</span><input id="nomEmail" type="email" placeholder="you@example.com" /></label>
-    <label class="field"><span>Phone number</span><input id="nomPhone" type="tel" placeholder="07XXXXXXXX" /></label>
+    <label class="field"><span>M-Pesa phone number</span><input id="nomPhone" type="tel" placeholder="07XXXXXXXX" /></label>
 
-    <button id="submitNomination" class="btn btn-primary btn-block">Submit Application</button>
+    <button id="submitNomination" class="btn btn-primary btn-block">Pay with M-Pesa</button>
     <button id="giveUpNomination" class="btn-link give-up-link">Give up</button>
     <p id="nominationStatus" class="vote-status"></p>
   </div>
