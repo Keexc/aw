@@ -332,6 +332,8 @@ a { color: inherit; }
   padding: 28px;
   width: 100%;
   max-width: 380px;
+  max-height: 90vh;
+  overflow-y: auto;
   position: relative;
 }
 .modal-close {
