@@ -1,5 +1,5 @@
 // Point this at your deployed backend (e.g. Render URL) before going live.
-const API_BASE = window.KEA_API_BASE || 'http://localhost:4000/api';
+const API_BASE = window.TCA_API_BASE || 'http://localhost:4000/api';
 
 const categoryList = document.getElementById('categoryList');
 const nomineeSection = document.getElementById('nominees');

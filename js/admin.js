@@ -1,4 +1,4 @@
-const API_BASE = window.KEA_API_BASE || 'http://localhost:4000/api';
+const API_BASE = window.TCA_API_BASE || 'http://localhost:4000/api';
 let token = localStorage.getItem('kea_admin_token') || null;
 let categoriesCache = [];
 
@@ -268,7 +268,7 @@ document.getElementById('exportCsv').addEventListener('click', (e) => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'kea-votes-export.csv';
+      a.download = 'tca-votes-export.csv';
       a.click();
     });
 });
