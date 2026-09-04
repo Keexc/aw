@@ -213,7 +213,9 @@ submitVoteBtn.addEventListener('click', async () => {
 
     currentTransactionId = data.transactionId;
     setButtonLoading(true, 'Waiting for payment…');
-    setStatus('Check your phone and enter your M-Pesa PIN to complete the vote.', '');
+    setStatus(data.pending
+      ? data.message
+      : 'Check your phone and enter your M-Pesa PIN to complete the vote.', '');
     pollPaymentStatus();
   } catch (err) {
     setStatus('Network error. Please try again.', 'error');
@@ -225,9 +227,9 @@ function pollPaymentStatus() {
   let attempts = 0;
   pollTimer = setInterval(async () => {
     attempts += 1;
-    if (attempts > 10) { // ~30s timeout
+    if (attempts > 60) { // ~3 minutes — covers a slow/cold-starting payment service
       clearInterval(pollTimer);
-      setStatus('Still waiting on confirmation. If you completed payment, your vote will be credited shortly.', '');
+      setStatus('Still waiting on confirmation. If you completed payment, your vote will be credited automatically once it clears — no need to pay again.', '');
       setButtonLoading(false);
       return;
     }
@@ -377,7 +379,9 @@ submitNominationBtn.addEventListener('click', async () => {
 
     currentApplicationId = data.applicationId;
     setNominationButtonLoading(true, 'Waiting for payment…');
-    nominationStatus.textContent = 'Check your phone and enter your M-Pesa PIN to pay the KSh 200 application fee.';
+    nominationStatus.textContent = data.pending
+      ? data.message
+      : 'Check your phone and enter your M-Pesa PIN to pay the KSh 200 application fee.';
     pollApplicationStatus();
   } catch (err) {
     nominationStatus.textContent = 'Network error. Please try again.';
@@ -390,9 +394,9 @@ function pollApplicationStatus() {
   let attempts = 0;
   nominationPollTimer = setInterval(async () => {
     attempts += 1;
-    if (attempts > 10) { // ~30s timeout
+    if (attempts > 60) { // ~3 minutes — covers a slow/cold-starting payment service
       clearInterval(nominationPollTimer);
-      nominationStatus.textContent = 'Still waiting on confirmation. If you completed payment, your application will go through shortly.';
+      nominationStatus.textContent = 'Still waiting on confirmation. If you completed payment, your application will go through automatically once it clears.';
       nominationStatus.className = 'vote-status';
       setNominationButtonLoading(false);
       return;
@@ -490,7 +494,9 @@ submitSponsorBtn.addEventListener('click', async () => {
 
     currentSponsorshipId = data.sponsorshipId;
     setSponsorButtonLoading(true, 'Waiting for payment…');
-    setSponsorStatus('Check your phone and enter your M-Pesa PIN to complete the sponsorship.', '');
+    setSponsorStatus(data.pending
+      ? data.message
+      : 'Check your phone and enter your M-Pesa PIN to complete the sponsorship.', '');
     pollSponsorshipStatus();
   } catch (err) {
     setSponsorStatus('Network error. Please try again.', 'error');
@@ -502,9 +508,9 @@ function pollSponsorshipStatus() {
   let attempts = 0;
   sponsorPollTimer = setInterval(async () => {
     attempts += 1;
-    if (attempts > 10) { // ~30s timeout
+    if (attempts > 60) { // ~3 minutes — covers a slow/cold-starting payment service
       clearInterval(sponsorPollTimer);
-      setSponsorStatus('Still waiting on confirmation. If you completed payment, the free voting day will start shortly.', '');
+      setSponsorStatus('Still waiting on confirmation. If you completed payment, the free voting day will start automatically once it clears.', '');
       setSponsorButtonLoading(false);
       return;
     }
